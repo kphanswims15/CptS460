@@ -21,6 +21,9 @@ char buf1[BLK], buf2[BLK];
 int color = 0x0A;
 u8 ino;
 
+int prints(char *s);
+int gets(char *s);
+
 main()
 {
   u16    i, iblk;
@@ -32,8 +35,8 @@ main()
 
 // 1. WRITE YOUR CODE to get iblk = bg_inode_table block number
   gp = (GD *)buf1;
-  iblk = (u16)gp->bg_inode_table;
-  prints("inode_block="); prints(iblk + "0"); prints("\n\r");
+  iblk = gp->bg_inode_table;
+  prints("inode_block="); putc(iblk + '0'); prints("\n\r");
 
 // 2. WRITE YOUR CODE to get root inode
   getblk(iblk, buf1);
@@ -41,9 +44,23 @@ main()
   prints("read inodes begin block to get root inode\n\r");
 
 // 3. WRITE YOUR CODE to step through the data block of root inode
-   getblk(ip->i_block[0], buf2);
-   dp = (DIR *)buf2;
-   cp = buf2;
+   /*for(i = 0; i < 12; i++)
+   {
+     if(i < 10)
+     {
+       prints("Block, i = ");
+       putc(i + '0');
+       prints("\n\r");
+     }
+     else if(i == 10)
+     {
+       prints("Block, i = 10\n\r");
+     }
+     else
+     {
+
+     }
+   }
    prints("read data block of root DIR\n\r");
 
 // 4. print file names in the root directory /
@@ -53,7 +70,7 @@ main()
      getc();
      cp += dp->rec_len;
      dp = (DIR *)cp;
-   }
+   }*/
 
 }
 
