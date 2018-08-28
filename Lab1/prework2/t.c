@@ -26,16 +26,15 @@ int gets(char *s);
 
 main()
 {
-  u16    i, iblk;
-  char   c, temp[64];
-  char *cp;
+  u16    i, iblk, good;
+  char   c, *temp;
 
   prints("read block# 2 (GD)\n\r");
   getblk(2, buf1);
 
 // 1. WRITE YOUR CODE to get iblk = bg_inode_table block number
   gp = (GD *)buf1;
-  iblk = gp->bg_inode_table;
+  iblk = (u16)gp->bg_inode_table;
   prints("inode_block="); putc(iblk + '0'); prints("\n\r");
 
 // 2. WRITE YOUR CODE to get root inode
@@ -44,34 +43,30 @@ main()
   prints("read inodes begin block to get root inode\n\r");
 
 // 3. WRITE YOUR CODE to step through the data block of root inode
-   /*for(i = 0; i < 12; i++)
-   {
-     if(i < 10)
-     {
-       prints("Block, i = ");
-       putc(i + '0');
-       prints("\n\r");
-     }
-     else if(i == 10)
-     {
-       prints("Block, i = 10\n\r");
-     }
-     else
-     {
-
-     }
-   }
-   prints("read data block of root DIR\n\r");
-
-// 4. print file names in the root directory /
-   while(cp < buf2 + 1024)
-   {
-     prints(dp->name);
-     getc();
-     cp += dp->rec_len;
-     dp = (DIR *)cp;
-   }*/
-
+  prints("read data block of root DIR\n\r");
+  for(i = 0; i < 12; i++)
+  {
+    if(ip->i_block[i] == 0)
+    {
+      break;
+    }
+    else
+    {
+      getblk((u16)ip->i_block[i], buf2);
+      gp = (GD *)buf2;
+      dp = (DIR *)buf2;
+      temp = buf2;
+      while(temp < buf2 + 1024)
+      {
+        // 4. print file names in the root directory /
+        prints(dp->name);
+        prints("\n\r");
+        getc();
+        temp += dp->rec_len;
+        dp = (DIR *)temp;
+      }
+    }
+  }
 }
 
 int prints(char *s)
