@@ -359,13 +359,13 @@ int show_bmp(char *p, int startRow, int startCol)
    r2 = 4*((3*w+3)/4);     // row size is a multiple of 4 bytes
    p += (h-1)*r2;
 
-   for (i=startRow; i<h+startRow; i += 1){
+   for (i=startRow; i<h+startRow; i += 2){
      pp = p;
      for (j=startCol; j<startCol+w; j+=2){
          b = *pp; g = *(pp+1); r = *(pp+2);
          pixel = (b<<16) + (g<<8) + r;
-	       fb[(i*640) + j/2] = pixel;
-         pp += 3;    // back pp by 3 bytes
+	       fb[(i/2*640) + j/2] = pixel;
+         pp += 6;    // back pp by 3 bytes
      }
      p -= (r2*2);
    }
