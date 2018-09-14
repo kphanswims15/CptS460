@@ -1,4 +1,4 @@
-int strlen(char *s)
+int kpstrlen(char *s)
 {
   int len = 0, i = 0;
 
@@ -9,7 +9,7 @@ int strlen(char *s)
   return len;
 }
 
-int strcmp(char *s1, char *s2)
+int kpstrcmp(char *s1, char *s2)
 {
   int i;
   for (i = 0; s1[i] && s2[i]; i++)
