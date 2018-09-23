@@ -166,9 +166,9 @@ int main()
 
    while(1){
       color = CYAN;
-      kprintf("Enter a line from KBD\n");
-      kgets(line);
+      //kprintf("Enter a line from KBD\n");
+      //kgets(line);
       color = CYAN;
-      kprintf("line = %s\n", line);
+      //kprintf("line = %s\n", line);
    }
 }

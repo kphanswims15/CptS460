@@ -20,8 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define KDATA 0x08
 #define KCLK  0x0C
 #define KISTA 0x10
-#define LSHFT 18
-#define RSHFT 89
+#define LEFTS 0x12
+#define RIGHTS 0x59
 
 typedef volatile struct kbd{
   char *base;
@@ -41,58 +41,56 @@ int kbd_init()
   kp->data = 0; kp->room = 128;
 }
 
-u8 keyDownMap[256];
+u8 keysDown[256];
 void keyDown(u8 keyCode)
 {
-    keyDownMap[keyCode] = '1';
+  keysDown[keyCode] = 1;
 }
 
 void keyUp(u8 keyCode)
 {
-  keyDownMap[keyCode] = '\0';
+  keysDown[keyCode] = 0;
 }
 
 int isKeyDown(u8 keyCode)
 {
-    if (keyDownMap[keyCode] == '1')
-    {
-      return 1;
-    }
-    else
-    {
-      return 0;
-    }
+  if (keysDown[keyCode] == 1)
+    return 1;
+  else
+    return 0;
 }
 
 void kbd_handler()
 {
-  u8 scode, c;
+  u8 scode, c, keyStatus;
   KBD *kp = &kbd;
   color = YELLOW;
   scode = *(kp->base + KDATA);
-  if (scode & 0x80)
-    return;
-  //printf("%d\n\r", scode);
 
-  if(isKeyDown(scode) == 1)
+  // catches the release character
+  if (scode == 0xF0)
+    return;
+
+  if (isKeyDown(scode) == 1)
   {
     keyUp(scode);
     return;
   }
 
-  // key must be UP and READY to USE
   keyDown(scode);
 
-  if (isKeyDown(RSHFT) || isKeyDown(LSHFT)) {
-    // UPPER
-    c = toUpper(scode);
-  }
-  else {
-    // LOWER
-    c = toLower(scode);
-  }
+  if (isKeyDown(LEFTS) || isKeyDown(RIGHTS))
+    c = utab[scode];
+  else
+    c = ltab[scode];
 
-  printf("%c", c);
+  if (c >= 'a' && c <= 'z' || c == '\b' || c == '\r' || c >= 'A' && c <= 'Z' || c == ' ')
+  {
+    if (c == '\r')
+      printf("\n");
+    printf("%c", c);
+     //printf("kbd interrupt: c=%x %c\n", c, c);
+  }
 
   kp->buf[kp->head++] = c;
   kp->head %= 128;
