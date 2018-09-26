@@ -313,7 +313,7 @@ int kprintf(char *fmt,...)
     if (*cp != '%'){
       kputc(*cp);
       if (*cp=='\n')
-	kputc('\r');
+	     kputc('\r');
       cp++;
       continue;
     }

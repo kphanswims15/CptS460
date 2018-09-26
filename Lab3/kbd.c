@@ -41,17 +41,22 @@ int kbd_init()
   kp->data = 0; kp->room = 128;
 }
 
+// keeps track of when the keys are down
 u8 keysDown[256];
+
+// marks that the key is down
 void keyDown(u8 keyCode)
 {
   keysDown[keyCode] = 1;
 }
 
+// marks that the key is up
 void keyUp(u8 keyCode)
 {
   keysDown[keyCode] = 0;
 }
 
+// checks if the key is down
 int isKeyDown(u8 keyCode)
 {
   if (keysDown[keyCode] == 1)
@@ -71,17 +76,22 @@ void kbd_handler()
   if (scode == 0xF0)
     return;
 
+  // releases the key if it is down
   if (isKeyDown(scode) == 1)
   {
     keyUp(scode);
     return;
   }
 
+  // key needs to be up and ready to use
   keyDown(scode);
 
+  // check if the shifts are down
   if (isKeyDown(LEFTS) || isKeyDown(RIGHTS))
+    // uppercase
     c = utab[scode];
   else
+    // lower case
     c = ltab[scode];
 
   if (c >= 'a' && c <= 'z' || c == '\b' || c == '\r' || c >= 'A' && c <= 'Z' || c == ' ')
