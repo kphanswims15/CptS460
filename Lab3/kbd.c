@@ -94,7 +94,7 @@ void kbd_handler()
     // lower case
     c = ltab[scode];
 
-  if (c >= 'a' && c <= 'z' || c == '\b' || c == '\r' || c >= 'A' && c <= 'Z' || c == ' ')
+  if (c >= 'a' && c <= 'z' || c == '\b' || c == '\r' || c >= 'A' && c <= 'Z' || c == ' ' || c >= '0' && c <= '9')
   {
     if (c == '\r')
       printf("\n");
