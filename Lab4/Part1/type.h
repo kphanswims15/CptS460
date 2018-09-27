@@ -72,12 +72,14 @@ typedef struct proc{
   int    *ksp;
   int    status;
   int    pid;
-
   int    priority;
   int    ppid;
+  int    event; // for sleep and wakeup
+  int    exitCode; // exit values
+
   struct proc *parent;
-  int    event;
-  int    exitCode;
+  struct proc *child;
+  struct proc *sibling;
 
   int    kstack[SSIZE];
 }PROC;

@@ -15,13 +15,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ********************************************************************/
 
 #include "type.h"
-#include "timer.c"
 #include "string.c"
 #include "queue.c"
 #include "kbd.c"
 #include "vid.c"
 #include "exceptions.c"
 #include "kernel.c"
+#include "timer.c"
 
 int color;
 
@@ -46,11 +46,16 @@ void IRQ_handler()
     //kprintf("vicstatus=%x sicstatus=%x\n", vicstatus, sicstatus);
     if (vicstatus & 0x80000000){
        if (sicstatus & 0x08){
-          kbd_handler();
+         kbd_handler();
        }
     }
+
+    if (vicstatus & (1<<4))
+    {
+      timer_handler(0);
+    }
 }
-int body();
+int body(int pid, int ppid, int func, int priority);
 int main()
 {
    int i;
@@ -61,12 +66,21 @@ int main()
    row = col = 0;
 
    fbuf_init();
-   timer_init();
-   kbd_init();
+
+   /* enable timer0,1, uart0,1 SIC interrupts */
+   VIC_INTENABLE |= (1<<4);  // timer0,1 at bit4
+   VIC_INTENABLE |= (1<<5);  // timer2,3 at bit5
+
+   VIC_INTENABLE |= (1<<31); // SIC to VIC's IRQ31
 
    /* enable KBD IRQ */
-   VIC_INTENABLE |= 1<<31;  // SIC to VIC's IRQ31
-   SIC_ENSET |= 1<<3;       // KBD int=3 on SIC
+   SIC_ENSET |= 1<<3;     // KBD int=3 on SIC
+   SIC_PICENSET = 1<<3;  // KBD int=3 on SIC
+
+   timer_init();
+   kbd_init();
+   timer_start(0);
+   /* enable KBD IRQ */
 
    kprintf("Welcome to WANIX in Arm\n");
    init();

@@ -29,6 +29,7 @@ typedef struct proc{
   int    *ksp;
   int    status;
   int    pid;
+
   int    priority;
   int    ppid;
   struct proc *parent;
@@ -66,12 +67,60 @@ int init()
   printList("freeList", freeList);
 }
 
-void kexit()
+int ksleep(int event)
 {
-  printf("proc %d kexit\n", running->pid);
+  int SR = int_off(); // disable IRQ and return CPSR
+  running->event = event;
+  running->status = SLEEP;
+  enqueue(&sleepList)
+  tswitch();
+  int_on(SR);
+}
+
+int kwakeup(int event)
+{
+  int i = 0;
+  int SR = int_off(); // disable IRQ and return CPSR
+
+  for (i = 1; i < NPROC; i++)
+  {
+    p = &proc[i];
+    if (p->status == SLEEP && p->event == event)
+    {
+      p->status == READY;
+      enqueue(&readyQueue, p);
+    }
+  }
+  int_on(SR);
+}
+
+void kexit(int exitValue)
+{
+  int i;
+  PROC *p;
+  /*printf("proc %d kexit\n", running->pid);
   running->status = FREE;
   running->priority = 0;
-  enqueue(&freeList, running);   // putproc(running);
+  enqueue(&freeList, running);   // putproc(running);*/
+
+  for (i = 1; i < NPROC; i++)
+  {
+    p = &proc[i];
+
+    // sending children to the orphanage
+    if(p->status != FREE && p->ppid == running->pid)
+    {
+      p->ppid = 1;
+      p->parent = &proc[1];
+    }
+  }
+
+  running->exitCode = exitValue;
+  running->status = ZOMBIE;
+
+  kwakeup(running->parent);
+  kwakeup(&proc[1]);
+
   tswitch();
 }
 
@@ -87,6 +136,37 @@ PROC *kfork(int func, int priority)
   p->priority = priority;
   p->ppid = running->pid;
   p->parent = running;
+
+  if(p->parent->child == '\0')
+  {
+    p->parent->child = p;
+  }
+  else
+  {
+    PROC *temp = p->parent->child;
+
+    while(temp->sibling != 0)
+    {
+      temp = temp->sibling;
+    }
+
+    temp->sibling = p;
+  }
+
+  printf("\nrunning pid: %d\n", running->pid);
+  printf("running ppid: %d\n", running->ppid);
+
+  PROC *temp = running->child;
+  if (running->child != 0)
+  {
+    printf("running children pid: %d\n", running->child->pid);
+  }
+
+  while(temp->sibling != 0)
+  {
+    printf("running children pid: %d\n", temp->sibling->pid);
+    temp = temp->sibling;
+  }
 
   // set kstack to resume to body
   // stack = r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r14
@@ -111,15 +191,14 @@ int scheduler()
 }
 
 
-int body(/*int pid, int ppid, int func, int priority*/)
+int body(int pid, int ppid, int func, int priority)
 {
   char c; char line[64];
-  int pid;
-
-  /*printf("pid: %d\n", pid);
+  //int pid;
+  printf("\npid: %d\n", pid);
   printf("ppid: %d\n", ppid);
   printf("func: %x\n", func);
-  printf("priority: %d\n", priority);*/
+  printf("priority: %d\n", priority);
 
   kprintf("proc %d resume to body()\n", running->pid);
   while(1){
