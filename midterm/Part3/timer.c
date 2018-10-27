@@ -23,8 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define CTL_PRESCALE_2      ( 0x00000004 )
 #define CTL_CTRLEN          ( 0x00000002 )
 #define CTL_ONESHOT         ( 0x00000001 )
-int color;
-int cursorFlash = 1;
 
 // timer register offsets from base address
 /**** byte offsets *******
@@ -85,22 +83,8 @@ void timer_init()
 void timer_handler(int n) {
     u32 ris, mis, value, load, bload, i;
     TIMER *t = &timer[n];
-    
-    t->tick++;
 
-    if (t->tick % 119 == 0)
-    {
-      if (cursorFlash)
-      {
-        putcursor(cursor);
-        cursorFlash = 0;
-      }
-      else
-      {
-        clrcursor();
-        cursorFlash = 1;
-      }
-    }
+    t->tick++;
 
     if (t->tick >= 240){
       t->tick = 0; t->ss++;

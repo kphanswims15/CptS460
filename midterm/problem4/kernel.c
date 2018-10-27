@@ -253,6 +253,16 @@ int kwait(int *status)
   }
 }
 
+int killpipe(int event)
+{
+  int SR = int_off();
+
+  running->event = event;
+  running->status = SLEEP;
+
+  int_on(SR);
+}
+
 int scheduler()
 {
   kprintf("proc %d in scheduler ", running->pid);
@@ -306,7 +316,7 @@ int body(int pid, int ppid, int func, int priority)
     printList("readyQueue", readyQueue);
     printList("freeList", freeList);
     kprintf("proc %d running, parent = %d\n", running->pid, running->ppid);
-    kprintf("input a char [s|f|q|w] : ");
+    kprintf("input a char [s|f|q|w|r] : ");
     c = kgetc();
     printf("%c\n", c);
 
@@ -314,7 +324,6 @@ int body(int pid, int ppid, int func, int priority)
       case 's': tswitch();                break;
       case 'f': kfork((int)body, 1);      break;
       case 'q': do_exit();                break;
-      case 'w': do_wait();                break;
     }
   }
 }

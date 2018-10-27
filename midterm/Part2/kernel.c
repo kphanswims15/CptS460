@@ -72,6 +72,7 @@ int init()
     p->status = READY;
     p->next = p + 1;
   }
+
   proc[NPROC-1].next = 0; // circular proc list
   freeList = &proc[0];
   readyQueue = 0;
@@ -306,7 +307,7 @@ int body(int pid, int ppid, int func, int priority)
     printList("readyQueue", readyQueue);
     printList("freeList", freeList);
     kprintf("proc %d running, parent = %d\n", running->pid, running->ppid);
-    kprintf("input a char [s|f|q|w] : ");
+    kprintf("input a char [s|f|q|w|t] : ");
     c = kgetc();
     printf("%c\n", c);
 
@@ -315,6 +316,7 @@ int body(int pid, int ppid, int func, int priority)
       case 'f': kfork((int)body, 1);      break;
       case 'q': do_exit();                break;
       case 'w': do_wait();                break;
+      case 't': countdown_handler();      break;
     }
   }
 }

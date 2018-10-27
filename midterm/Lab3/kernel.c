@@ -76,13 +76,13 @@ int init()
   freeList = &proc[0];
   readyQueue = 0;
 
-  printf("create P0 as initial running process\n");
+  //printf("create P0 as initial running process\n");
   p = dequeue(&freeList);
   p->priority = 0;
   p->ppid = 0; p->parent = p;  // P0's parent is itself
   running = p;
-  kprintf("running = %d\n", running->pid);
-  printList("freeList", freeList);
+  //kprintf("running = %d\n", running->pid);
+  //printList("freeList", freeList);
 }
 
 int ksleep(int event)
@@ -90,7 +90,7 @@ int ksleep(int event)
   int SR = int_off(); // disable IRQ and return CPSR
   running->event = event;
   running->status = SLEEP;
-  tswitch();
+  //tswitch();
   int_on(SR);
 }
 
@@ -259,7 +259,7 @@ int scheduler()
   if (running->status == READY)
       enqueue(&readyQueue, running);
   running = dequeue(&readyQueue);
-  kprintf("next running = %d\n", running->pid);
+  //kprintf("next running = %d\n", running->pid);
 }
 
 int do_exit()
@@ -285,12 +285,12 @@ int body(int pid, int ppid, int func, int priority)
   int exitValue, status;
 
   //int pid;
-  printf("\npid: %d\n", pid);
-  printf("ppid: %d\n", ppid);
-  printf("func: %x\n", func);
-  printf("priority: %d\n", priority);
+  //printf("\npid: %d\n", pid);
+  //printf("ppid: %d\n", ppid);
+  //printf("func: %x\n", func);
+  //printf("priority: %d\n", priority);
 
-  kprintf("proc %d resume to body()\n", running->pid);
+  //kprintf("proc %d resume to body()\n", running->pid);
   while(1){
     pid = running->pid;
     if (pid==0) color=BLUE;
@@ -303,12 +303,12 @@ int body(int pid, int ppid, int func, int priority)
     if (pid==7) color=WHITE;
     if (pid==8) color=CYAN;
 
-    printList("readyQueue", readyQueue);
-    printList("freeList", freeList);
-    kprintf("proc %d running, parent = %d\n", running->pid, running->ppid);
-    kprintf("input a char [s|f|q|w] : ");
-    c = kgetc();
-    printf("%c\n", c);
+    //printList("readyQueue", readyQueue);
+    //printList("freeList", freeList);
+  //  kprintf("proc %d running, parent = %d\n", running->pid, running->ppid);
+  //  kprintf("input a char [s|f|q|w] : ");
+    //c = kgetc();
+    //printf("%c\n", c);
 
     switch(c){
       case 's': tswitch();                break;

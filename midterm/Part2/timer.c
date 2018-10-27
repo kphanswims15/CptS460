@@ -85,7 +85,7 @@ void timer_init()
 void timer_handler(int n) {
     u32 ris, mis, value, load, bload, i;
     TIMER *t = &timer[n];
-    
+
     t->tick++;
 
     if (t->tick % 119 == 0)

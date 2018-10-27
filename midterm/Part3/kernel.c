@@ -43,6 +43,15 @@ PROC proc[NPROC], *running, *freeList, *readyQueue;
 int procsize = sizeof(PROC);
 int body();
 
+struct semaphore *sp;
+struct semaphore empty;
+struct semaphore full;
+struct semaphore pmutex;
+struct semaphore cmutex;
+
+int head, tail;
+char buf[8];
+
 int atoi(char *s)
 {
   int v = 0;
@@ -76,13 +85,21 @@ int init()
   freeList = &proc[0];
   readyQueue = 0;
 
-  printf("create P0 as initial running process\n");
+  sp->value = 1;
+  empty.value = 8;
+  full.value = 0;
+  pmutex.value = 1;
+  pmutex.spinlock = 0;
+  cmutex.value = 1;
+  cmutex.spinlock = 0;
+
+  //printf("create P0 as initial running process\n");
   p = dequeue(&freeList);
   p->priority = 0;
   p->ppid = 0; p->parent = p;  // P0's parent is itself
   running = p;
-  kprintf("running = %d\n", running->pid);
-  printList("freeList", freeList);
+  //kprintf("running = %d\n", running->pid);
+  //printList("freeList", freeList);
 }
 
 int ksleep(int event)
@@ -178,18 +195,18 @@ PROC *kfork(int func, int priority)
     temp->sibling = p;
   }
 
-  printf("\nrunning pid: %d\n", running->pid);
-  printf("running ppid: %d\n", running->ppid);
+  //printf("\nrunning pid: %d\n", running->pid);
+  //printf("running ppid: %d\n", running->ppid);
 
   PROC *temp = running->child;
   if (running->child != 0)
   {
-    printf("running children pid: %d\n", running->child->pid);
+    //printf("running children pid: %d\n", running->child->pid);
   }
 
   while(temp->sibling != 0)
   {
-    printf("running children pid: %d\n", temp->sibling->pid);
+    //printf("running children pid: %d\n", temp->sibling->pid);
     temp = temp->sibling;
   }
 
@@ -255,11 +272,11 @@ int kwait(int *status)
 
 int scheduler()
 {
-  kprintf("proc %d in scheduler ", running->pid);
+  //kprintf("proc %d in scheduler ", running->pid);
   if (running->status == READY)
       enqueue(&readyQueue, running);
   running = dequeue(&readyQueue);
-  kprintf("next running = %d\n", running->pid);
+  //kprintf("next running = %d\n", running->pid);
 }
 
 int do_exit()
@@ -279,18 +296,69 @@ int do_wait()
   printf("Zombie exitCode: %d\n", status);
 }
 
+int block(struct semaphore *s)
+{
+  printf("block\n");
+  running->status = BLOCK;
+  enqueue(&s->queue, running);
+  printList("s->queue", s->queue);
+  tswitch();
+}
+
+int signal(struct semaphore *s)
+{
+  PROC *p = dequeue(&s->queue);
+  p->status = READY;
+  enqueue(&readyQueue, p);
+}
+
+int producer()
+{
+  while(1)
+  {
+    P(&empty);
+    P(&pmutex);
+    printf("In producer. Enter char: ");
+    char c = kgetc();
+    kputc(c);
+    printf("\n");
+    buf[head++] = c;
+    head %= 8;
+    V(&pmutex);
+    V(&full);
+  }
+}
+
+int consumer()
+{
+  while(1)
+  {
+    P(&full);
+    P(&cmutex);
+    char c = buf[tail];
+    printf("Consumer got char %c\n", c);
+    if (c != 0)
+    {
+      tail++;
+      tail %= 8;
+    }
+      V(&cmutex);
+      V(&empty);
+  }
+}
+
 int body(int pid, int ppid, int func, int priority)
 {
   char c; char line[64];
   int exitValue, status;
 
   //int pid;
-  printf("\npid: %d\n", pid);
-  printf("ppid: %d\n", ppid);
-  printf("func: %x\n", func);
-  printf("priority: %d\n", priority);
+  //printf("\npid: %d\n", pid);
+  //printf("ppid: %d\n", ppid);
+  //printf("func: %x\n", func);
+  //printf("priority: %d\n", priority);
 
-  kprintf("proc %d resume to body()\n", running->pid);
+  //kprintf("proc %d resume to body()\n", running->pid);
   while(1){
     pid = running->pid;
     if (pid==0) color=BLUE;
@@ -303,10 +371,10 @@ int body(int pid, int ppid, int func, int priority)
     if (pid==7) color=WHITE;
     if (pid==8) color=CYAN;
 
-    printList("readyQueue", readyQueue);
-    printList("freeList", freeList);
+    //printList("readyQueue", readyQueue);
+    //printList("freeList", freeList);
     kprintf("proc %d running, parent = %d\n", running->pid, running->ppid);
-    kprintf("input a char [s|f|q|w] : ");
+    kprintf("input a char [s|f|q|w|c|p] : ");
     c = kgetc();
     printf("%c\n", c);
 
@@ -315,6 +383,8 @@ int body(int pid, int ppid, int func, int priority)
       case 'f': kfork((int)body, 1);      break;
       case 'q': do_exit();                break;
       case 'w': do_wait();                break;
+      case 'c': consumer();               break;
+      case 'p': producer();               break;
     }
   }
 }
