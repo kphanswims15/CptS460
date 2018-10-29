@@ -57,4 +57,13 @@ int mount_root(char *devName, MINODE **root, MINODE *minode, PROC **running, PRO
   }
 
   // reads the SUPER block
+  get_block(fd, 1, buf);
+  sp = (SUPER *)buf;
+
+  // checks if it is a valid device
+  if (sp->s_magic != 0xEF53)
+  {
+    printf("%s is NOT an EXT2 FS\n", devName);
+    return 1;
+  }
 }
