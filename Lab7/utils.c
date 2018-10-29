@@ -40,6 +40,74 @@ int get_block(int fd, int blk, char *buf)
   return read(fd, buf, BLKSIZE);
 }
 
+MINODE *iget(int dev, int ino, MINODE *minode)
+{
+  char buf[BLKSIZE];
+  int  found = 0, block, disp;
+  INODE *ip;
+  MINODE *mip = minode;
+  GD *gp;
+
+  // Search for an item pointed to
+  // search minode[] array for an item pointed by mip with the same (dev, ino)
+  while (mip->dev < 0 || mip->refCount > 0)
+  {
+    if (mip->dev == dev && mip->ino)
+    {
+      found = 1;
+      break;
+    }
+    mip++;
+  }
+
+  if (!found)
+  {
+    // Inode is not loaded into memory
+    // searches minode array for mip with refCount = 0
+    mip = minode;
+    while (mip->dev < 0 || mip->refCount > 0)
+    {
+      mip++;
+    }
+
+    // mark it in use
+    mip->refCount = 1;
+
+    // Asign the value of dev and ino
+    mip->dev = dev;
+    mip->ino = ino;
+
+    // Initialize other fields: dirty = 0, mounted = 0, mountPtr = 0
+    mip->dirty = 0;
+    mip->mounted = 0;
+    mip->mptr = 0;
+
+    // Assign to blk and disp
+    get_block(mip->dev, 2, buf);
+    gp = (GD *)buf;
+
+    // block comtains the inode
+    block = (mip->ino - 1) / 8 + gp->bg_inode_table;
+    // which inode in the block
+    disp = (mip->ino - 1) % 8;
+
+    // Load the block into buf
+    get_block(dev, block, buf);
+
+    // Point ip to INODE in buf
+    ip = ((INODE *)buf) + disp;
+
+    // copy INODE into minode.INODE
+    mip->INODE = *ip;
+  }
+  else
+  {
+    mip->refCount++;
+    return mip;
+  }
+  return mip;
+}
+
 int mount_root(char *devName, MINODE **root, MINODE *minode, PROC **running, PROC *p[], struct mntTable **mtables)
 {
   char buf[BLKSIZE];

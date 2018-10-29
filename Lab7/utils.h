@@ -15,4 +15,5 @@
 
 void init(PROC *p[], MINODE *minode[], int numMInodes, MINODE **root);
 int get_block(int fd, int blk, char *buf);
+MINODE *iget(int dev, int ino, MINODE *minode);
 int mount_root(char *devName, MINODE **root, MINODE *minode, PROC **running, PROC *p[], struct mntTable **mtables);
