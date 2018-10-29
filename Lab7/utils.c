@@ -134,4 +134,23 @@ int mount_root(char *devName, MINODE **root, MINODE *minode, PROC **running, PRO
     printf("%s is NOT an EXT2 FS\n", devName);
     return 1;
   }
+
+  // get the root inode
+  *root = iget(fd, 2, minode);
+
+  // make sure that mount tables are allocated properly
+  if (*mtables == NULL)
+  {
+    *mtables = (struct mntTable *)malloc(sizeof(struct mntTable));
+  }
+
+  mtable = *mtables;
+
+  // using mTable[0] to record
+  // dev = fd
+  mtable[0].dev = fd;
+
+  // ninodes, nblocks from ext2_superblock
+  mtable[0].ninodes = sp->s_inodes_count;
+  mtable[0].nblock = sp->s_blocks_count;
 }
