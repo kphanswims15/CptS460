@@ -29,5 +29,5 @@ int main(int argc, char *argv[])
 
   dev = argv[1];
 
-  
+  init(&processes, &minode, 100, &root);
 }

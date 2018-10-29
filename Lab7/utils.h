@@ -12,3 +12,7 @@
 #include "types.h"
 
 #define BLOCK_SIZE 1024
+
+void init(PROC *p[], MINODE *minode[], int numMInodes, MINODE **root);
+int get_block(int fd, int blk, char *buf);
+int mount_root(char *devName, MINODE **root, MINODE *minode, PROC **running, PROC *p[], struct mntTable **mtables);
