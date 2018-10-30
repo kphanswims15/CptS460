@@ -70,7 +70,7 @@ PROC *kfork(char *filename)
   Busp = Btop - 32;
 
   cp = (char *)Busp;
-  strcpy(cp, istring);
+  kstrcpy(cp, istring);
 
   p->kstack[SSIZE - 14] = (int)(0x80100000 - 32);
 

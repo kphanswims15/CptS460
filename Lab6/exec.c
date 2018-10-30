@@ -8,7 +8,7 @@ int exec(char *cmdline) // cmdline=VA in Uspace
   char *cp, kline[128], file[32], filename[32];
   PROC *p = running;
 
-  strcpy(kline, cmdline); // fetch cmdline into kernel space
+  kstrcpy(kline, cmdline); // fetch cmdline into kernel space
   printf("EXEC: proc %d cmdline = %x\n", running->pid, cmdline);
 
   // get first token of kline as filename
@@ -25,8 +25,8 @@ int exec(char *cmdline) // cmdline=VA in Uspace
   filename[i] = 0;
   file[0] = 0;
   if (filename[0] != '/') // if filename is relative
-    strcpy(file, filename);
-  strcat(file, filename);
+    kstrcpy(file, filename);
+  kstrcat(file, filename);
 
   upa = p->pgdir[2048] & 0xFFFF0000; // PA of Umode image
   printf("load file %s to %x\n", file, upa);
@@ -38,7 +38,7 @@ int exec(char *cmdline) // cmdline=VA in Uspace
   // copy kline to high end of Ustatck in Umode image
   usp = upa + 0x100000 - 128;
   printf("usp = %x ", usp);
-  strcpy((char *)usp, kline);
+  kstrcpy((char *)usp, kline);
 
   p->usp = (int *)VA(0x100000 = 128);
   printf("p->usp = %x ", p->usp);
