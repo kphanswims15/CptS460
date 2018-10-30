@@ -4,6 +4,92 @@ char *istring = "init start";
 PROC *kfork(char *filename)
 {
   // called by P0 to creat P1 with /bin/init as Umode image
+  int i;
+  char *cp, line[8];
+  int *ustacktop, *usp;
+  u32 BA, Btop, Busp;
+
+  PROC *p = getproc();
+  if (p == 0)
+  {
+    printf("kfork failed\n");
+    return (PROC *)0;
+  }
+  p->ppid = running->pid;
+  p->parent = running;
+  p->status = READY;
+  p->priority =  1;
+
+  // set kstack to resume to go Umode
+  for (i = 1; i < 29; i++) // all 28 cells = 0
+    p->kstack[SSIZE - i] = 0;
+
+  // in dec reg=address ORDER!!!
+  p->kstack[SSIZE - 15] = (int)goUmode;
+  p->ksp = &(p->kstack[SSIZE - 28]);
+
+  // kstack must contain a resume frame FOLLOWed by a goUmode frame
+  //  ksp
+  //  -|-----------------------------------------
+  //  r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 fp ip pc|
+  //  -------------------------------------------
+  //  28 27 26 25 24 23 22 21 20 19 18  17 16 15
+  //
+  //   usp      NOTE: r0 is NOT saved in svc_entry()
+  // -|-----goUmode--------------------------------
+  //  r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 ufp uip upc|
+  //-------------------------------------------------
+  //  14 13 12 11 10 9  8  7  6  5  4   3    2   1
+  /********************
+
+  // to go Umode, must set new PROC's Umode cpsr to Umode=10000
+  // this was done in ts.s dring init the mode stacks ==>
+  // user mode's cspr was set to IF=00, mode=10000
+
+  ***********************/
+  // must load filename to Umode image area at 8MB+(pid-1)*1MB
+  if (filename)
+    load(filename, p); // p->PROC containing pid, pgdir, etc
+
+  // must fix Umode ustack for it to goUmode: how did the PROC come to Kmode?
+  // by swi # from VA=0 in Umode => at that time all CPU regs are 0
+  // we are in Kmode, p's ustack is at its Uimage (8mb+(pid-1)*1mb) high end
+  // from PROC's point of view, it's a VA at 1MB (from its VA=0)
+  // but we in Kmode must access p's Ustack directly
+
+  /***** this sets each proc's ustack differently, thinking each in 8MB+
+  ustacktop = (int *)(0x800000+(p->pid)*0x100000 + 0x100000);
+  TRY to set it to OFFSET 1MB in its section; regardless of pid
+  **********************************************************************/
+  // p's physical begin address is at BA=p->pgdir[2048] & 0xFFF00000
+  // its ustacktop is at BA+1MB = BA + 0x100000;
+  // put istring in it, let p->usp be its VA pointing at the istring
+
+  BA = p->pgdir[2048] & 0xFFF00000;
+  Btop = BA + 0x100000;
+  Busp = Btop - 32;
+
+  cp = (char *)Busp;
+  strcpy(cp, istring);
+
+  p->kstack[SSIZE - 14] = (int)(0x80100000 - 32);
+
+  p->usp = (int *)(0x80100000 - 32);
+  p->upc = (int *)0x80000000; // need this in goUmode
+  p->ucpsr = (int *)0x10;
+
+  p->kstack[SSIZE - 1] = (int)0x80000000;
+  // -|-----goUmode-------------------------------------------------
+  //  r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 ufp uip upc|string       |
+  //----------------------------------------------------------------
+  //  14 13 12 11 10 9  8  7  6  5  4   3    2   1 |             |
+
+  enqueue(&readyQueue, p);
+
+  printf("proc %d kforked a child %d\n", running->pid, p->pid);
+  printQ(readyQueue);
+
+  return p;
 }
 
 int fork()
