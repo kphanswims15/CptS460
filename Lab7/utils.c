@@ -153,4 +153,34 @@ int mount_root(char *devName, MINODE **root, MINODE *minode, PROC **running, PRO
   // ninodes, nblocks from ext2_superblock
   mtable[0].ninodes = sp->s_inodes_count;
   mtable[0].nblock = sp->s_blocks_count;
+
+  // reads the group desc block
+  get_block(fd, 2, buf);
+  gp = (GD *)buf;
+
+  // bmap, imap, iblock from GD
+  mtable[0].bmap = gp->bg_block_bitmap;
+  mtable[0].imap = gp->bg_inode_bitmap;
+  mtable[0].iblock = gp->bg_inode_table;
+
+  // mount point DIR pointer = root
+  mtable[0].mountDirPtr = *root;
+
+  // device name = "YOUR DISK name"
+  strcpy(mtable[0].devName, devName);
+
+  // mntPointDirName = "/"
+  strcpy(mtable[0].mntName, "/");
+
+  // set cwd of p0 and p1 point at the root minode
+  (*p)[0].cwd = iget(fd, 2, minode);
+  (*p)[1].cwd = iget(fd, 2, minode);
+
+  // Assign root's mptr to mtable[0]
+  (*root)->mptr = mtable;
+
+  // let running->p0
+  *running = p[0];
+
+  return fd;
 }
