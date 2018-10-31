@@ -211,3 +211,16 @@ void print_inode(INODE *inode)
   printf("%-29s %5d\n", "CTime", inode->i_ctime);
   printf("%-29s %5d\n", "Links", inode->i_links_count);
 }
+
+int parseInput(char *line, char **myargv[])
+{
+  char *token = NULL, **tmp = NULL;
+  int i = 0;
+  size_t size = 0;
+
+  token = strtok(line, " ");
+  while (token != NULL)
+  {
+    
+  }
+}

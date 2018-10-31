@@ -37,4 +37,27 @@ int main(int argc, char *argv[])
     printf("Disk %s does not exist\n", argv[1]);
     return 2;
   }
+
+  print_minode(root);
+
+  while(1)
+  {
+    printf("Input a command : ");
+
+    bzero(line, MAX);
+    fgets(line, MAX, stdin);
+
+    line[strlen(line) - 1] = 0;
+    if (line[0] == 0)
+      exit(0);
+
+    printf("Line: %s", line);
+
+    lineCopy = (char *)malloc(sizeof(char) * (strlen(line) + 1));
+    strcpy(lineCopy, line);
+    myargv = NULL;
+    numArgs = 
+  }
+
+  return 0;
 }
