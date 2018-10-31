@@ -184,3 +184,30 @@ int mount_root(char *devName, MINODE **root, MINODE *minode, PROC **running, PRO
 
   return fd;
 }
+
+void print_minode(MINODE *minode)
+{
+  printf("********** MINODE %d:%d Info **********\n", minode->dev, minode->ino);
+  print_inode(&minode->INODE);
+  printf("%-29s %5d\n", "Dev", minode->dev);
+  printf("%-29s %5d\n", "Ino", minode->ino);
+  printf("%-29s %5d\n", "RefCount", minode->refCount);
+  printf("%-29s %5d\n", "Dirty", minode->dirty);
+  printf("%-29s %5d\n", "Mounted", minode->mounted);
+  printf("%-29s    \n", "Mount Table:");
+  printf("%-29s %5d\n", "   nblock", minode->mptr->nblock);
+  printf("%-29s %5d\n", "   ninodes", minode->mptr->ninodes);
+  printf("%-29s %5d\n", "   bmap", minode->mptr->bmap);
+  printf("%-29s %5d\n", "   imap", minode->mptr->imap);
+  printf("%-29s %5d\n", "   iblock", minode->mptr->iblock);
+  printf("****************************************\n", );
+}
+
+void print_inode(INODE *inode)
+{
+  printf("%-29s %5d\n", "Mode", inode->i_mode);
+  printf("%-29s %5d\n", "UID", inode->i_uid);
+  printf("%-29s %5d\n", "Size", inode->i_size);
+  printf("%-29s %5d\n", "CTime", inode->i_ctime);
+  printf("%-29s %5d\n", "Links", inode->i_links_count);
+}
