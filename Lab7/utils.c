@@ -221,6 +221,22 @@ int parseInput(char *line, char **myargv[])
   token = strtok(line, " ");
   while (token != NULL)
   {
-    
+    tmp = (char **)realloc(*myargv, size + sizeof(char *));
+    if (tmp != NULL)
+    {
+      *myargv = tmp;
+    }
+    else
+    {
+      printf("Realloc failed\n");
+      return -1;
+    }
+    size += sizeof(char *);
+    (*myargv)[i] = NULL;
+    (*myargv)[i] = realloc((*myargv)[i], sizeof(char) * (strlen(token) + 1));
+    strcpy((*myargv)[i], token);
+    token = strtok(NULL, " ");
+    i++;
   }
+  return i;
 }
