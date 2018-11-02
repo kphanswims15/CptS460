@@ -40,6 +40,12 @@ int get_block(int fd, int blk, char *buf)
   return read(fd, buf, BLKSIZE);
 }
 
+int put_block(innt fd, int blk, char *buf)
+{
+  lseek(fd, (long)blk * BLKSIZE, SEEK_SET);
+  return write(fd, blk, BLKSIZE);
+}
+
 MINODE *iget(int dev, int ino, MINODE *minode)
 {
   char buf[BLKSIZE];
@@ -106,6 +112,153 @@ MINODE *iget(int dev, int ino, MINODE *minode)
     return mip;
   }
   return mip;
+}
+
+void iput(MINODE *mip, MINODE *minode)
+{
+  int block = 0, disp = 0;
+  char buf[BLOCK_SIZE];
+  INODE *ip;
+  GD *gp;
+
+  mip->refCount--;
+
+  if (mip->refCount <= 0 && mip->dirty)
+  {
+    // INODE needs to be written back to disk
+    printf("iput: dev=%d ino=%d size=%d\n", mip->dev, mip->ino, mip->INODE.i_size);
+
+    // Calculate block and disp
+    get_block(mip->dev, 2, buf);
+    gp = (GD *)buf;
+
+    // which INODE in the block
+    block = (mip->ino - 1) / 8 + gp->bg_inode_table;
+    // offset of the INODE in the buf
+    disp = (mip->ino - 1) % 8;
+
+    get_block(mip->dev, block, buf);
+
+    if (mip->INODE.i_links_count != 0)
+    {
+      ip = (INODE *)buf + disp;
+      *ip = mip->INODE;
+    }
+
+    put_block(mip->dev, block, buf);
+
+  }
+}
+
+int search(int dev, MINODE *mip, char *name)
+{
+  int i, blockNo, i_blocks[15];
+  DIR *tmp;
+  char buf[BLOCK_SIZE], *cp;
+
+  // loads all the blocks into an array
+  for (i = 0; i < 15; i++)
+  {
+    i_blocks[i] = mip->INODE.i_block[i];
+  }
+
+  // Check direct entries
+  for (i = 0; i < 12; i++)
+  {
+    blockNo = i_blocks[i];
+    if (blockNo == 0)
+    {
+      break;
+    }
+    get_block(dev, blockNo, buf);
+    tmp = (DIR *)buf;
+    cp = buf;
+    while (cp < buf + BLOCK_SIZE)
+    {
+      if (strcmp(name, tmp->name) == 0)
+      {
+        return tmp->inode;
+      }
+      cp += tmp->rec_len;
+      tmp = (DIR *)cp;
+    }
+  }
+  return 0;
+}
+
+int tokenize(char *buf, char **names[])
+{
+  char *token, **tmp;
+  int i = 0;
+  size_t size = 0;
+
+  *names = (char **)realloc(*names, sizeof(char *));
+
+  if (pathname[0] == '/')
+  {
+    pathname++;
+  }
+
+  token = strtok(pathname, "/");
+  while (token != NULL)
+  {
+    tmp = realloc(*names, size + sizeof(char *));
+    if (tmp != NULL)
+    {
+      *names = tmp;
+    }
+    else
+    {
+      printf("Realloc failed\n");
+      return -1;
+    }
+    size += sizeof(char *);
+    (*names)[i] = NULL;
+    (*names)[i] = realloc(*names[i], sizeof(char) * (strlen(token) + 1));
+    strcpy(*names[i], token);
+    token = strtok(NULL, "/");
+    i++;
+  }
+  return i;
+}
+
+int getino(char *pathname, MINODE *root, PROC *running, MINODE *minode)
+{
+  int i, n, ino, dev;
+  char buf[BLOCK_SIZE], **names = NULL;
+  MINODE *mip = NULL;
+
+  dev = root->dev;
+
+  // checks if it is just root
+  if (strcmp(pathname, "/") == 0)
+    return 2;
+
+  // checks if it is an absolute path
+  if (pathname[0] == '/')
+    mip = iget(dev, 2, minode);
+  else
+    mip = iget(dev, running->cwd->ino, minode);
+
+  strcpy(buf, pathname);
+  n = tokenize(buf, &names);
+
+  for (i = 0; i < n; i++)
+  {
+    ino = search(dev, mip, names[i]);
+
+    // if inode does not exist the mip is written back to the disk
+    if (ino == 0)
+    {
+      iput(mip, minode);
+      return 0;
+    }
+    iput(mip, minode);
+    mip = iget(dev, ino, minode);
+  }
+  iput(mip, minode);
+
+  return ino;
 }
 
 int mount_root(char *devName, MINODE **root, MINODE *minode, PROC **running, PROC *p[], struct mntTable **mtables)

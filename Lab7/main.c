@@ -56,8 +56,43 @@ int main(int argc, char *argv[])
     lineCopy = (char *)malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(lineCopy, line);
     myargv = NULL;
-    numArgs = 
-  }
+    numArgs = parseInput(lineCopy, &myargv);
+    if (numArgs < 2)
+    {
+      myargv = (char **)realloc(myargv, 2 * sizeof(char *));
+      myargv[1] = NULL;
+    }
 
+    if (numArgs < 3)
+    {
+      myargv = (char **)realloc(myargv, 3 * sizeof(char *));
+      myargv[2] = NULL;
+    }
+
+    free(lineCopy);
+    lineCopy = NULL;
+    cmdIndex = findCmd(myargv[0]);
+
+    switch(cmdIndex)
+    {
+      // cmd = ls
+      case 0: ls(myargv[1], root, running, minode);
+              myargv[1] = NULL;
+              break;
+      // cmd = cd
+      case 1: chdirec(myargv[1], running, root, minode);
+              myargv[1] = NULL;
+              break;
+      // cmd = pwd
+      case 2: pwd(running->cwd, root, minode);
+              break;
+      // cmd = quit
+      case 3: quit(minode);
+              break;
+      default: printf("Command does not exist\n");
+               break;
+    }
+    myargv = NULL;
+  }
   return 0;
 }
