@@ -13,5 +13,6 @@
 int chdirec(char *pathname, PROC *running, MINODE *root, MINODE *minode);
 void rpwd(MINODE *cwd, MINODE *root, MINODE *minode);
 void pwd(MINODE *cwd, MINODE *root, MINODE *minode);
+void makedir(char *pathname, MINODE *cwd, MINODE *root, PROC *running, MINODE *minode);
 
-#endif
+#endif //__DIRECTORIES_H__

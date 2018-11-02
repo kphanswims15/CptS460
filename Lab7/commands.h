@@ -9,6 +9,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <time.h>
+#include "directories.h"
+#include "links.h"
 #include "types.h"
 #include "utils.h"
 
@@ -16,11 +18,11 @@
 #define MAX 256
 #endif
 
-extern  char *cmd[];
+extern char *cmd[];
 
 int findCmd(char *command);
 void ls_file(int dev, int ino, char *name, MINODE *root, PROC *running, MINODE *minode);
 void ls(char *name, MINODE *root, PROC *running, MINODE *minode);
 void quit(MINODE *minode);
 
-#endif
+#endif //__COMMANDS_H__
