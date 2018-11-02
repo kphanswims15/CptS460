@@ -19,9 +19,11 @@ int put_block(int fd, int blk, char *buf);
 MINODE *iget(int dev, int ino, MINODE *minode);
 void iput(MINODE *mip, MINODE *minode);
 int search(int dev, MINODE *mip, char *name);
-int tokenize(char *buf, char **names[]);
+int tokenize(char *pathname, char **names[]);
 int getino(char *pathname, MINODE *root, PROC *running, MINODE *minode);
 int mount_root(char *devName, MINODE **root, MINODE *minode, PROC **running, PROC *p[], struct mntTable **mtables);
 void print_minode(MINODE *minode);
 void print_inode(INODE *inode);
 int parseInput(char *line, char **myargv[]);
+
+#endif

@@ -12,8 +12,8 @@ void init(PROC *p[], MINODE *minode[], int numMInodes, MINODE **root)
   (*p)[0].gid = 0;
 
   // get the uid and the gid of the user
-  (*p)[1].geteuid();
-  (*p)[1].getegid();
+  (*p)[1].uid = geteuid();
+  (*p)[1].gid = getegid();
 
   // setting the cwd of each process to 0
   (*p)[0].cwd = NULL;
@@ -40,7 +40,7 @@ int get_block(int fd, int blk, char *buf)
   return read(fd, buf, BLKSIZE);
 }
 
-int put_block(innt fd, int blk, char *buf)
+int put_block(int fd, int blk, char *buf)
 {
   lseek(fd, (long)blk * BLKSIZE, SEEK_SET);
   return write(fd, blk, BLKSIZE);
@@ -186,7 +186,7 @@ int search(int dev, MINODE *mip, char *name)
   return 0;
 }
 
-int tokenize(char *buf, char **names[])
+int tokenize(char *pathname, char **names[])
 {
   char *token, **tmp;
   int i = 0;
@@ -348,12 +348,12 @@ void print_minode(MINODE *minode)
   printf("%-29s %5d\n", "Dirty", minode->dirty);
   printf("%-29s %5d\n", "Mounted", minode->mounted);
   printf("%-29s    \n", "Mount Table:");
-  printf("%-29s %5d\n", "   nblock", minode->mptr->nblock);
-  printf("%-29s %5d\n", "   ninodes", minode->mptr->ninodes);
-  printf("%-29s %5d\n", "   bmap", minode->mptr->bmap);
-  printf("%-29s %5d\n", "   imap", minode->mptr->imap);
-  printf("%-29s %5d\n", "   iblock", minode->mptr->iblock);
-  printf("****************************************\n", );
+  //printf("%-29s %5d\n", "   nblock", minode->mptr->nblock);
+  //printf("%-29s %5d\n", "   ninodes", minode->mptr->ninodes);
+  //printf("%-29s %5d\n", "   bmap", minode->mptr->bmap);
+  //printf("%-29s %5d\n", "   imap", minode->mptr->imap);
+  //printf("%-29s %5d\n", "   iblock", minode->mptr->iblock);
+  printf("****************************************\n");
 }
 
 void print_inode(INODE *inode)

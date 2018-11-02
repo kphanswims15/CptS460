@@ -8,6 +8,8 @@
 #include "types.h"
 #include "utils.h"
 #include "commands.h"
+#include "directories.h"
+#include "links.h"
 
 #define MAX 256
 
@@ -19,7 +21,7 @@ int main(int argc, char *argv[])
   struct mntTable *mtable = NULL;
   int fd, numArgs, cmdIndex, count, size;
   char **myargv = NULL;
-  char *lineCopy = NULL, *buf = NULL, *name = NULL;
+  char *lineCopy = NULL, *buf = NULL;
 
   if (argc < 2)
   {
@@ -51,7 +53,7 @@ int main(int argc, char *argv[])
     if (line[0] == 0)
       exit(0);
 
-    printf("Line: %s", line);
+    printf("Line: %s\n", line);
 
     lineCopy = (char *)malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(lineCopy, line);

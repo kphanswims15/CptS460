@@ -1,7 +1,7 @@
 #include "commands.h"
 
 // CMD: Array containing strings of the available commands, null terminated
-char *cmd[] = { "ls", "cd", "pwd", 0 };
+char *cmd[] = { "ls", "cd", "pwd", "quit", 0 };
 
 int findCmd(char * command)
 {
