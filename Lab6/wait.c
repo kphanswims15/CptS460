@@ -60,7 +60,7 @@ int kexit(int value)
   kwakeup((int)running->parent);
   if (wk1)
     kwakeup((int)&proc[1]);
-  tswtich();
+  tswitch();
 }
 
 int kwait(int *status)
@@ -89,7 +89,7 @@ int kwait(int *status)
     for (i = 1; i < NPROC; i++)
     {
       p = &proc[i];
-      if ((p->status == ZOMBIE) && (p->ppid == runing->pid))
+      if ((p->status == ZOMBIE) && (p->ppid == running->pid))
       {
         printf("proc %d found a ZOMBIE child %d\n", running->pid, p->pid);
         *status = p->exitCode;

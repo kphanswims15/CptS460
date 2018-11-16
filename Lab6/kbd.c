@@ -34,6 +34,30 @@ volatile char kbuf[128];
 volatile int khead, ktail, kchar, kroom;
 volatile int kline;
 
+// keeps track of when the keys are down
+u8 keysDown[256];
+
+// marks that the key is down
+void keyDown(u8 keyCode)
+{
+  keysDown[keyCode] = 1;
+}
+
+// marks that the key is up
+void keyUp(u8 keyCode)
+{
+  keysDown[keyCode] = 0;
+}
+
+// checks if the key is down
+int isKeyDown(u8 keyCode)
+{
+  if (keysDown[keyCode] == 1)
+    return 1;
+  else
+    return 0;
+}
+
 void kbd_handler()
 {
   unsigned char scode, c;
@@ -51,7 +75,18 @@ void kbd_handler()
   if (scode==0x38 || scode==0xB8) goto out;
   if (scode & 0x80)               goto out;
 
-  c = unsh[scode];
+  // releases the key if it is down
+  if (isKeyDown(scode) == 1)
+  {
+    keyUp(scode);
+    goto out;
+  }
+
+  // key needs to be up and ready to use
+  keyDown(scode);
+
+  c = ltab[scode];
+
   //kprintf("kbd interrupt: c=%x %c\n", c, c);
   kprintf("%c", c);
   kbuf[khead++] = c;

@@ -144,7 +144,7 @@ reset_handler:
   BIC r1, r0, #0x1F  // r1 = r0 = cspr's lowest 5 bits cleared to 0
   ORR r1, r1, #0x12  // OR in 0x12=1010 = IRQ mode
   MSR cpsr, r1       // write to cspr, so in IRQ mode now
-  LDR sp, =irq_stack_top  // IS THIS REALLY NEEDED? WHY not just proc's kstack?
+  LDR sp, irq_stack_top  // IS THIS REALLY NEEDED? WHY not just proc's kstack?
 
   /* Enable IRQs */
   BIC r0, r0, #0x80  // set r0=cspr.I bit to 0 to unmask IRQ interrupts
