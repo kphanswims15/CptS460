@@ -9,11 +9,13 @@ int main(int argc, char *argv[])
   {
     // display executable commands in /bin directory
     // prompt for a command line cmdline = "cmd a1 a2 .... an"
+    printf("Enter a command: ");
+    ugetline(cmdline);
 
 
-    if(!strcmp(cmd, "exit"))
+    if(!strcmp(cmdline, "exit"))
     {
-      exit(0);
+      uexit();
     }
     // fork a child process to execute the cmd line
     pid = fork();

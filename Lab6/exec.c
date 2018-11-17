@@ -9,13 +9,14 @@ int exec(char *cmdline) // cmdline=VA in Uspace
   PROC *p = running;
 
   kstrcpy(kline, cmdline); // fetch cmdline into kernel space
+  printf("kline: %s\n", kline);
   printf("EXEC: proc %d cmdline = %x\n", running->pid, cmdline);
 
   // get first token of kline as filename
   cp = kline;
   i = 0;
 
-  while(*cp != ' ')
+  while(*cp != '\0')
   {
     filename[i] = *cp;
     i++;
@@ -23,9 +24,10 @@ int exec(char *cmdline) // cmdline=VA in Uspace
   }
 
   filename[i] = 0;
-  file[0] = 0;
+  printf("filename: %s\n", filename);
+  //file[0] = 0;
   if (filename[0] != '/') // if filename is relative
-    kstrcpy(file, filename);
+    kstrcpy(file, "/bin/");
   kstrcat(file, filename);
 
   upa = p->pgdir[2048] & 0xFFFF0000; // PA of Umode image

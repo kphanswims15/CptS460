@@ -53,13 +53,13 @@ void copy_vectors(void) {
 int kprintf(char *fmt, ...);
 void timer0_handler();
 
-void DATA_handler()
+void data_handler()
 {
   printf("data exception\n");
 }
 
 // IRQ interrupts handler entry point
-void IRQ_handler()
+void irq_handler()
 {
     int vicstatus, sicstatus;
     int ustatus, kstatus;

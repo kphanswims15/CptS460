@@ -27,6 +27,7 @@ int ups()
 {
   return syscall(2,0,0,0);
 }
+
 int uchname()
 {
   char s[32];

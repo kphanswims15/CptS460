@@ -76,7 +76,7 @@ int atoi(char *s)
 int geti()
 {
   char s[16];
-  kgetline(s);
+  ugetline(s);
   return atoi(s);
 }
 

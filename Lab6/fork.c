@@ -66,7 +66,7 @@ PROC *kfork(char *filename)
   // put istring in it, let p->usp be its VA pointing at the istring
 
   BA = p->pgdir[2048] & 0xFFF00000;
-  Btop = BA + 0x100000;
+  Btop = BA + 0x200000;
   Busp = Btop - 32;
 
   cp = (char *)Busp;
@@ -117,7 +117,7 @@ int fork()
   printf("copy Umode image from %x to %x\n", PA, CA);
 
   // copy 1MB of Umode image
-  memcpy((char *)CA, (char *)PA, 0x100000);
+  memcpy((char *)CA, (char *)PA, 0x200000);
 
   // both should be in their VA sections
   p->usp = running->usp;

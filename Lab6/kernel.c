@@ -61,7 +61,7 @@ int init()
     for (j=2049; j<4096; j++){ // zero out high 2048 entries
       mtable[j] = 0;
     }
-    mtable[2048]=(0x800000 + (i-1)*0x100000)|0xC12; // entry 2048 OR in 0xC12
+    mtable[2048]=(0x800000 + (i-1)*0x200000)|0xC12; // entry 2048 OR in 0xC12
     mtable += 4096;
   }
 }
