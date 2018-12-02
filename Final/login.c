@@ -1,7 +1,6 @@
 /********** login **********/
 // login.c: Upon entry, argv[0]=login, argv[1]=/dev/ttyx
 #include "ucode.c"
-#include <string.h>
 
 int in, out, err, fd;
 char name[128], password[128], line[64], buf[1024];
