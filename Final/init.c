@@ -76,43 +76,34 @@ main()
   // for display to console
   out = open("/dev/tty0", O_WRONLY);
 
+  printf("hi\n");
+
+  printf("INIT : fork a login proc on console\n");
   console = fork();
 
   if (console) {    // parent
+    printf("INIT : fork a login proc on ser1\n");
     ser1 = fork();
-    if (ser1) {
+    if (ser1)
+    {
+      printf("INIT : fork a login proc on ser0\n");
       ser0 = fork();
-      if (ser0) {
+      if (ser0)
+      {
         parent();
       }
-      else {
-        exec("login /dev/ttyS0");
+      else
+      {
+        loginser0();
       }
     }
-    else {
-      exec("login /dev/ttyS1");
+    else
+    {
+      loginser1();
     }
   }
-  else {            // child: exec to login on tty0
-    exec("login /dev/tty0");
-  }
-
-  /*printf("INIT : fork a login proc on console\n");
-  console = fork();
-
-  // parent
-  if(console)
-    ser0 = fork();
-  else if (!console)
+  else
+  {            // child: exec to login on tty0
     login();
-
-  if(ser0)
-    ser1 = fork();
-  else if (!ser0)
-    loginser0();
-  if (ser1)
-    parent();
-  // child; exec to login on tty0
-  else if (!ser1)
-    loginser1();*/
+  }
 }
