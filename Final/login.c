@@ -5,20 +5,70 @@
 int in, out, err, fd;
 char name[128], password[128], line[64], buf[1024];
 
-int tokenize(char *source, char *delimiter)
+int eatline(char *line, char *name[ ])
 {
-  char str_buff[64];
-  char *token;
-  int i = 0, total = 0;
+  int i, n; char *cp;
 
-  if (!source || !delimiter)
-  {
-    printf("bad inputs to tokenize\n");
-    return -1;
+  n = 0;
+  for (i=0; i<16; i++)
+      name[i]=0;
+
+  cp = line;
+  while (*cp != 0){
+       while (*cp == ' ') // skip over blanks
+              *cp++ = 0;
+       if (*cp != 0)
+           name[n++] = cp;
+       while (*cp != ':' && *cp != 0) // scan over token chars
+	       cp++;
+       if (*cp != 0)
+	   *cp = 0;
+       else
+           break;
+       cp++;
   }
 
-  // strtok destroys source
+  for (i=0; i < n; i++){
+      if (name[i]){
+         prints(name[i]); prints("  ");
+      }
+  }
+  prints("\n\r");
 
+  return n;
+}
+
+int eatfile(char *line, char *name[ ])
+{
+  int i, n; char *cp;
+
+  n = 0;
+  for (i=0; i<16; i++)
+      name[i]=0;
+
+  cp = line;
+  while (*cp != 0){
+       while (*cp == ' ') // skip over blanks
+              *cp++ = 0;
+       if (*cp != 0)
+           name[n++] = cp;
+       while (*cp != '\n' && *cp != 0) // scan over token chars
+	       cp++;
+       if (*cp != 0)
+	   *cp = 0;
+       else
+           break;
+       cp++;
+  }
+
+  for (i=0; i < n; i++){
+      if (name[i]){
+         prints(name[i]); prints("  ");
+      }
+  }
+  prints("\n\r");
+
+  return n;
 }
 
 main(int argc, char *argv[])
@@ -47,6 +97,9 @@ main(int argc, char *argv[])
     printf("login:");
     gets(name);
 
+    printf("password:");
+    gets(passwd);
+    
     read(fd, buf, 1024);
     getline(buf);
     // 6. if (user has a valid account)
