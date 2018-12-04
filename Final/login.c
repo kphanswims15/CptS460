@@ -2,24 +2,23 @@
 // login.c: Upon entry, argv[0]=login, argv[1]=/dev/ttyx
 #include "ucode.c"
 
-int in, out, err, fd;
-char name[128], password[128], line[64], buf[1024];
+char buf[1024];
 
-int eatline(char *line, char *name[ ])
+int parser(char *line, char *names[ ], char token)
 {
   int i, n; char *cp;
 
   n = 0;
   for (i=0; i<16; i++)
-      name[i]=0;
+      names[i]=0;
 
   cp = line;
   while (*cp != 0){
        while (*cp == ' ') // skip over blanks
               *cp++ = 0;
        if (*cp != 0)
-           name[n++] = cp;
-       while (*cp != ':' && *cp != 0) // scan over token chars
+           names[n++] = cp;
+       while (*cp != token && *cp != 0) // scan over token chars
 	       cp++;
        if (*cp != 0)
 	   *cp = 0;
@@ -27,62 +26,28 @@ int eatline(char *line, char *name[ ])
            break;
        cp++;
   }
-
-  for (i=0; i < n; i++){
-      if (name[i]){
-         prints(name[i]); prints("  ");
-      }
-  }
-  prints("\n\r");
-
-  return n;
-}
-
-int eatfile(char *line, char *name[ ])
-{
-  int i, n; char *cp;
-
-  n = 0;
-  for (i=0; i<16; i++)
-      name[i]=0;
-
-  cp = line;
-  while (*cp != 0){
-       while (*cp == ' ') // skip over blanks
-              *cp++ = 0;
-       if (*cp != 0)
-           name[n++] = cp;
-       while (*cp != '\n' && *cp != 0) // scan over token chars
-	       cp++;
-       if (*cp != 0)
-	   *cp = 0;
-       else
-           break;
-       cp++;
-  }
-
-  for (i=0; i < n; i++){
-      if (name[i]){
-         prints(name[i]); prints("  ");
-      }
-  }
-  prints("\n\r");
 
   return n;
 }
 
 main(int argc, char *argv[])
 {
-    // 1. close file description 0, 1 inherited from INIT
+  int i = 0;
+  int in, out, err;
+  int fd, n, size;
+  char *elements[100], *lines[100], *yo[100];
+  char name[128], password[128];
+
+  // 1. close file descriptors 0,1 inherited from INIT
   close(0);
   close(1);
 
   // 2. open argv[1] 3 times as in(0), out(1), err(2)
-  in = open(argv[1], 0);
+  in =  open(argv[1], 0);
   out = open(argv[1], 1);
   err = open(argv[1], 2);
 
-  // 3. settty(argv[1])
+  // 3. settty(argv[1]); // set tty name string in PROC.tty
   settty(argv[1]);
 
   // 4. open /etc/passwd file for READ
@@ -98,17 +63,38 @@ main(int argc, char *argv[])
     gets(name);
 
     printf("password:");
-    gets(passwd);
-    
-    read(fd, buf, 1024);
-    getline(buf);
-    // 6. if (user has a valid account)
+    gets(password);
 
+    n = read(fd, buf, 1024);
+    if (n <= 0)
+    {
+      printf("There are no passwords found\n");
+    }
+
+    size = parser(buf, lines, '\n');
+
+    for (i = 0; i < size; i++)
+    {
+      parser(lines[i], elements, ':');
+
+      // 6. if (user has a valid account)
+      // username:password:uid:gid:mode:directory:execmd
+      if (strcmp(name, elements[0]) == 0 && strcmp(password, elements[1]) == 0)
+      {
         /* 7. change uid, gid to user's uid, gid // chuid()
               change cwd to user's home DIR // chdir()
               close opened /ect/passwd file // close()*/
+        chuid(atoi(elements[2]), atoi(elements[3]));
+        chdir(elements[5]);
+        close(fd);
 
-       // 8. exec to program in user account // exec()
+        // 8. exec to program in user account // exec()
+        printf("KPLOGIN: Welcome! %s\n", elements[0]);
+        printf("KPLOGIN: cd to HOME=%s change uid to %d", elements[5], atoi(elements[2]));
+        exec(elements[6]);
+        return 1;
+      }
+    }
   }
   printf("login failed, try again\n");
 }
