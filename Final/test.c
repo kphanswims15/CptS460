@@ -26,12 +26,12 @@ int eat(char *line, char *name[ ])
        cp++;
   }
 
-  for (i=0; i < n; i++){
+  /*for (i=0; i < n; i++){
       if (name[i]){
          prints(name[i]); prints("  ");
       }
   }
-  prints("\n\r");
+  prints("\n\r");*/
 
   return n;
 }
@@ -74,25 +74,51 @@ int main(int argc, char *argv[ ])
 {
   int i;
   int fd, n;
+  int size;
   char *name[100];
+  char *elements[100];
   char *something;
   int pid = getpid();
   printf("KCW: PROC %d running test program\n", pid);
 
-  something = "root:12345:1000:0:superuser:/root:sh\nhello:54321:2000:0:user:/user:sh";
+  /*something = "root:12345:1000:0:superuser:/root:sh\nhello:54321:2000:0:user:/user:sh\nboo:13579:3000:0:user:/user:sh";
 
-  eatfile(something, name);
+  size = eatfile(something, name);
+
+  for(i = 0; i < size; i++)
+  {
+    eat(name[i], elements);
+  }*/
 
   printf("argc = %d\n", argc);
   for (i=0; i<argc; i++)
     printf("argv[%d] = %s\n", i, argv[i]);
 
-  fd = open("f1", O_RDONLY);
+  fd = open("/etc/passwd", O_RDONLY);
+
+  //open("f1", O_RDONLY);
   printf("fd = %d\n", fd);
   if (fd < 0)
     exit(1);
 
   n = read(fd, buf, 1024);
+  eatfile(buf, name);
+  size = eat(name[0], elements);
+
+  for (i=0; i<size; i++)
+  {
+    prints(elements[i]);
+    prints(" ");
+  }
+  prints("\n\r");
+
+  size = eat(name[1], elements);
+  for (i=0; i<size; i++)
+  {
+    prints(elements[i]);
+    prints(" ");
+  }
+  prints("\n\r");
 
   printf("n=%d buf=%s\n", n, buf);
 
