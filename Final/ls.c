@@ -74,6 +74,10 @@ main(int argc, char *argv[])
 
   chdir(cwd);
 
+  prints("$$$$$$$$$$$$$$$$$$$$$$$\n");
+  prints("Kimi's ls at work!!!!!!\n");
+  prints("$$$$$$$$$$$$$$$$$$$$$$$\n");
+
   if (fd < 0)
   {
     printf("File not opened successfully\n");
