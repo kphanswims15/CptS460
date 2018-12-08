@@ -90,7 +90,7 @@ main(int argc, char *argv[])
 
         // 8. exec to program in user account // exec()
         printf("KPLOGIN: Welcome! %s\n", elements[0]);
-        printf("KPLOGIN: cd to HOME=%s change uid to %d", elements[5], atoi(elements[2]));
+        printf("KPLOGIN: cd to HOME=%s change uid to %d\n", elements[5], atoi(elements[2]));
         exec(elements[6]);
         return 1;
       }
