@@ -33,6 +33,7 @@ main(int argc, char *argv[])
     {
       prints("\n\r");
 
+      // prints a page
       if (line < 25)
       {
         line++;
@@ -40,9 +41,16 @@ main(int argc, char *argv[])
       else
       {
         c = getc();
+        // if the user presses space
         if (c == ' ')
         {
+          // line to 0
           line = 0;
+        }
+        // if the user presses enter
+        else if (c == 13)
+        {
+          continue;
         }
       }
     }
