@@ -94,7 +94,12 @@ main(int argc, char *argv[])
         exec(elements[6]);
         return 1;
       }
+      else
+      {
+        prints("login failed, try again\n");
+        name[0] = 0;
+        password[0] = 0;
+      }
     }
   }
-  printf("login failed, try again\n");
 }

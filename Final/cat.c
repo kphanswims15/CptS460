@@ -3,7 +3,7 @@
 main(int argc, char *argv[])
 {
   int in, out, n;
-  char buf[1024], tty[128];
+  char buf[1024];
 
   if (argc == 1)
   {
@@ -17,7 +17,7 @@ main(int argc, char *argv[])
     out = 1;
   }
 
-  // loop to read the file byte from byte 
+  // loop to read the file byte from byte
   while(1)
   {
     n = read(in, buf, 1);
