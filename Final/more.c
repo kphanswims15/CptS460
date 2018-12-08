@@ -7,15 +7,20 @@ main(int argc, char *argv[])
 
   if (argc == 1)
   {
+    // using STDIN
     in = 0;
     out = 1;
   }
   else
   {
-    // catting a file
+    // using file
     in = open(argv[1], O_RDONLY);
     out = 1;
   }
+
+  prints("$$$$$$$$$$$$$$$$$$$\n");
+  prints("Kimi's more running\n");
+  prints("$$$$$$$$$$$$$$$$$$$\n");
 
   // loop to read the file byte from byte
   while(1)
