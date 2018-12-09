@@ -2,8 +2,22 @@
 
 main(int argc, char *argv[])
 {
-  int in, out, n;
-  char buf[1024];
+  int in, out, outtty, n;
+  char buf[1024], ttty[32], c;
+  char *line1 = "$$$$$$$$$$$$$$$$$$$$$$$$$";
+  char *line2 = "Kimi's cat at work! Meow!";
+  char *line3 = "$$$$$$$$$$$$$$$$$$$$$$$$$";
+
+  gettty(ttty);
+
+  outtty = open(ttty, O_WRONLY);
+
+  write(outtty, line1, strlen(line1));
+  write(outtty, "\n\r", 2);
+  write(outtty, line2, strlen(line2));
+  write(outtty, "\n\r", 2);
+  write(outtty, line3, strlen(line3));
+  write(outtty, "\n\r", 2);
 
   if (argc == 1)
   {
@@ -18,32 +32,35 @@ main(int argc, char *argv[])
     out = 1;
   }
 
-  prints("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n");
-  prints("Kimi's cat running! MEOW!!!!!\n");
-  prints("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n");
-
   // loop to read the file byte from byte
   while(1)
   {
     n = read(in, buf, 1);
+
     if (n < 1)
     {
       break;
     }
 
-    if (buf[0] == '\n')
+    if (in == 0)
     {
-      prints("\n\r");
-    }
-    // if the user enters the enter key
-    else if (buf[0] == 13)
-    {
-      prints("\n\r");
+      if (buf[0] != 13)
+      {
+        write(out, buf, 1);
+      }
+      else
+      {
+        write(out, "\n\r", 2);
+      }
     }
     else
     {
       write(out, buf, 1);
+      if (buf[0] == '\n')
+      {
+        write(out, "\r", 1);
+      }
     }
   }
-  close(in);
+  close(in); close(outtty);
 }

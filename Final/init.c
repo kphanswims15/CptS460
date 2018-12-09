@@ -80,20 +80,25 @@ main()
 
   if (console) {    // parent
     ser1 = fork();
-    if (ser1) {
+    if (ser1)
+    {
       ser0 = fork();
-      if (ser0) {
+      if (ser0)
+      {
         parent();
       }
-      else {
+      else
+      {
         loginser0();
       }
     }
-    else {
+    else
+    {
       loginser1();
     }
   }
-  else {            // child: exec to login on tty0
+  else
+  {           
     login();
   }
 }

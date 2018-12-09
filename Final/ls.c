@@ -93,7 +93,7 @@ main(int argc, char *argv[])
   // go through the directory
   while (cp < buf2 + 1024)
   {
-    // ls each entry with permission bits
+    // ls each entry file
     strcpy(name, dp->name);
     strcat(name, "\0");
     ls_file(name);
