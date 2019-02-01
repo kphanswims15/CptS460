@@ -1,20 +1,24 @@
+
 #include "ucode.c"
 
 char buf[1024];
 
 main(int argc, char *argv[])
 {
-  int in, out, outtty, inttty, n, line = 0;
-  char ttty[32], c;
+  int in, out, outtty, intty, n, line = 0;
+  char tty[32], c;
 
   char *line1 = "$$$$$$$$$$$$$$$$$$$$";
   char *line2 = "Kimi's more at work!";
   char *line3 = "$$$$$$$$$$$$$$$$$$$$";
 
-  gettty(ttty);
+  char *warning = "Unable to open the file\n";
+  // get the current tty
+  gettty(tty);
 
-  inttty = open(ttty, O_RDONLY) ;
-  outtty = open(ttty, O_WRONLY);
+  // open the current tty for read and write
+  intty = open(tty, O_RDONLY);
+  outtty = open(tty, O_WRONLY);
 
   write(outtty, line1, strlen(line1));
   write(outtty, "\n\r", 2);
@@ -33,6 +37,11 @@ main(int argc, char *argv[])
   {
     // using file
     in = open(argv[1], O_RDONLY);
+    if (in < 0)
+    {
+      write(outtty, warning, strlen(warning));
+      return -1;
+    }
     out = 1;
   }
 
@@ -40,56 +49,44 @@ main(int argc, char *argv[])
   // loop to read the file byte from byte
   while(1)
   {
-
+    // read one back at time from the file
     n = read(in, buf, 1);
 
     // check if there is stuff left in the file
     if (n < 1)
     {
-      break;
+      return 0;
     }
 
-    /*if (in == 0)
+    // write the bytes one at a time
+    write(outtty, buf, 1);
+
+    // print the new line
+    if (buf[0] == '\n')
     {
-      if (buf[0] != 13)
+      write(outtty, "\r", 1);
+
+      if (line < 25)
       {
-        write(out, buf, 1);
+        line++;
       }
       else
       {
-        write(out, "\n\r", 2);
+        // wait for user input
+        read(intty, &c, 1);
+
+        // if the user pushes enter
+        if(c == '\r')
+        {
+          line--;
+        }
+        // if the user presses space print whole page
+        else if(c == ' ')
+        {
+          line = 0;
+        }
       }
     }
-    else
-    {*/
-      // write the bytes one at a time
-     write(outtty, buf, 1);
-
-      // print the new line
-      if (buf[0] == '\n')
-      {
-        write(outtty, "\r", 1);
-
-        // prints a page
-        if (line < 25)
-        {
-          line++;
-        }
-        else
-        {
-          read(inttty, &c, 1);
-          // if the user presses space
-          if(c == '\r')
-          {
-            line--;
-          }
-          else if(c == ' ')
-          {
-            line = 0;
-          }
-        }
-      }
-    //}
   }
-  close(in); close(outtty);
+  close(in); close(outtty); close(intty);
 }

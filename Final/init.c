@@ -78,27 +78,34 @@ main()
 
   console = fork();
 
-  if (console) {    // parent
+  // parent
+  if (console)
+  {
     ser1 = fork();
+    // parent
     if (ser1)
     {
       ser0 = fork();
+      // parent
       if (ser0)
       {
         parent();
       }
       else
       {
+        // child: exec to login on ttyS0
         loginser0();
       }
     }
     else
     {
+      // child: exec to login on ttyS1
       loginser1();
     }
   }
   else
-  {           
+  {
+    // child: exec to login on tty0
     login();
   }
 }

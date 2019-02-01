@@ -31,6 +31,31 @@ int nk;
 extern char cr;
 
 //void putchar(const char c){ }
+int parser(char *line, char *names[ ], char token)
+{
+  int i, n; char *cp;
+
+  n = 0;
+  for (i=0; i<16; i++)
+      names[i]=0;
+
+  cp = line;
+  while (*cp != 0){
+       while (*cp == ' ') // skip over blanks
+              *cp++ = 0;
+       if (*cp != 0)
+           names[n++] = cp;
+       while (*cp != token && *cp != 0) // scan over token chars
+	       cp++;
+       if (*cp != 0)
+	   *cp = 0;
+       else
+           break;
+       cp++;
+  }
+
+  return n;
+}
 
 int getc()
 {
